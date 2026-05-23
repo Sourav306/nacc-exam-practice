@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PSW / NACC Exam Prep</title>
+  <style>
+    :root{--bg:#f6f8fc;--card:#fff;--text:#172033;--muted:#64748b;--line:#dbe3ef;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--amber:#d97706;}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+    header{background:linear-gradient(135deg,#0f172a,#2563eb);color:white;padding:28px 16px;text-align:center} header h1{margin:0 0 8px;font-size:30px} header p{margin:0;opacity:.9}
+    .wrap{max-width:1050px;margin:0 auto;padding:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 8px 22px rgba(15,23,42,.06)}
+    .top{position:sticky;top:0;z-index:5}.grid{display:grid;gap:10px}.stats{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.pill{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#f8fafc;font-weight:700}.muted{color:var(--muted)}
+    button,select{border:0;border-radius:10px;padding:11px 13px;font-weight:700}button{background:var(--blue);color:white;cursor:pointer}button:hover{filter:brightness(.94)}button.secondary{background:#e2e8f0;color:#111827}button.red{background:var(--red)}button.green{background:var(--green)}select{border:1px solid var(--line);background:white;color:var(--text)}
+    .progress{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:var(--blue);transition:.2s}.q{border:1px solid var(--line);border-radius:16px;background:white;padding:16px;margin:12px 0}.q.good{background:#f0fdf4;border-color:#86efac}.q.bad{background:#fef2f2;border-color:#fca5a5}.qhead{display:flex;gap:10px}.qnum{font-weight:900;color:var(--blue);min-width:58px}.qtext{font-weight:800}.sec{font-size:12px;color:#475569;font-weight:700;margin-bottom:4px;text-transform:uppercase}.opt{display:block;border:1px solid var(--line);border-radius:12px;padding:11px;margin:8px 0;cursor:pointer}.opt:hover{background:#f8fafc}.opt input{margin-right:8px;transform:scale(1.15)}.right{border-color:var(--green)!important;background:#dcfce7!important}.wrong{border-color:var(--red)!important;background:#fee2e2!important}.fb{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#f8fafc;padding:11px}.fb.show{display:block}.hide{display:none!important}
+    table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid var(--line);padding:8px;text-align:left}th{background:#f8fafc}.notice{border-left:5px solid var(--amber);padding:10px 12px;background:#fffbeb;border-radius:12px}.result{font-size:18px;font-weight:900}.small{font-size:13px}@media(max-width:700px){header h1{font-size:24px}.qhead{display:block}.qnum{margin-bottom:6px}.top{position:static}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>PSW / NACC Exam Prep</h1>
+  <p>Full 200-question mock using your exam format + section practice + wrong-answer review.</p>
+</header>
+<main class="wrap">
+  <section class="card top">
+    <div class="grid">
+      <div class="stats">
+        <span class="pill">Mode: <span id="modeText">Full Exam</span></span>
+        <span class="pill">Answered: <span id="answered">0</span>/<span id="total">200</span></span>
+        <span class="pill">Timer: <span id="timer">180:00</span></span>
+        <span class="pill">Score: <span id="score">--</span></span>
+      </div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="stats">
+        <button onclick="newFullExam()">New 200Q Exam</button>
+        <select id="sectionSelect"></select>
+        <button class="secondary" onclick="startSection()">Practice Section</button>
+        <button class="green" onclick="submitExam()">Submit / Check</button>
+        <button class="secondary" onclick="showWrongOnly()">Wrong Only</button>
+        <button class="secondary" onclick="showAll()">Show All</button>
+        <button class="red" onclick="resetAll()">Reset</button>
+      </div>
+      <div class="notice small"><b>Exam structure used:</b> FOUN 21, BODY 17, CARE 15, COGN 16, DYING 16, FAMI 15, HEAL 17, HOUS 14, HYGI 15, MEDS 15, SAFE 16, GPA 15, ABUS 8 = 200 questions.</div>
+    </div>
+  </section>
+  <section id="resultBox" class="card hide"></section>
+  <section id="quiz"></section>
+</main>
+<script>
+const blueprint={FOUN:21,BODY:17,CARE:15,COGN:16,DYING:16,FAMI:15,HEAL:17,HOUS:14,HYGI:15,MEDS:15,SAFE:16,GPA:15,ABUS:8};
+const names={FOUN:'Foundations',BODY:'Body Systems',CARE:'Care Planning',COGN:'Cognitive/Mental Health',DYING:'Assisting the Dying Person',FAMI:'Family/Growth',HEAL:'Health Conditions',HOUS:'Housekeeping',HYGI:'Hygiene',MEDS:'Medications',SAFE:'Safety/Mobility',GPA:'Gentle Persuasive Approach',ABUS:'Abuse/Neglect'};
+const pools={
+FOUN:[
+q('Holistic care means caring for:', 'physical, social, psychological, and spiritual needs',['physical needs only','medical needs only','emotional needs only'],'Holistic care looks at the whole person.'),
+q('Self-determination means the client has the right to:', 'make choices and refuse care',['change doctor orders','ignore all safety rules','give medication to others'],'Clients have the right to make choices, including refusal.'),
+q('A client says, “I have pain.” This is:', 'subjective data',['objective data','diagnosis','medical order'],'Subjective data is what the client reports.'),
+q('You observe a swollen ankle. This is:', 'objective data',['subjective data','opinion','assumption'],'Objective data is seen, heard, smelled, or measured.'),
+q('Best charting note:', 'Client refused lunch and stated, “I feel sick.”',['Client was lazy','Client is probably depressed','Client was rude'],'Chart facts and exact client words.'),
+q('Touching a client without consent is:', 'battery',['assault','defamation','negligence'],'Battery is unauthorized touching.'),
+q('Threatening to harm a client is:', 'assault',['battery','neglect','confidentiality'],'Assault is threat or attempt to harm.'),
+q('A false statement damaging reputation is:', 'defamation',['battery','restraint','empathy'],'Defamation damages reputation.'),
+q('Locking a client in a room against their will is:', 'false imprisonment',['battery','documentation','empathy'],'False imprisonment restricts freedom illegally.'),
+q('Failing to follow the care plan and harming the client may be:', 'negligence',['culture','empathy','self-esteem'],'Negligence is improper care causing harm.'),
+q('Client information should be shared with:', 'health team members involved in care only',['friends','other residents','any visitor'],'Confidentiality protects private information.'),
+q('If a PSW makes a care mistake, they should:', 'report immediately',['hide it','tell only another PSW','wait until next week'],'Errors must be reported right away.'),
+q('The PSW should identify a client by:', 'checking ID band and calling client by name',['room number only','asking another resident','clothing label only'],'Use two identifiers when possible.'),
+q('If a delegated task is unsafe or outside training, you should:', 'clarify/refuse and report to supervisor',['do it quickly','ask family to do it','ignore it'],'Stay within training and scope.'),
+q('ADLs include:', 'bathing, grooming, eating, elimination',['banking and shopping','car repairs','legal decisions'],'ADLs are basic daily living tasks.'),
+q('IADLs include:', 'laundry, housekeeping, shopping, meal preparation',['bathing only','breathing and circulation','wound healing'],'IADLs support independent living.'),
+q('Culture includes:', 'values, beliefs, language, customs',['only food','only religion','only nationality'],'Culture is broad and personal.'),
+q('Empathy means:', 'understanding another person’s feelings',['judging the client','giving advice always','feeling sorry only'],'Empathy is understanding, not pity.'),
+q('The client has the right to:', 'all of these',['privacy','respectful care','refuse treatment'],'Client rights include privacy, respect, and refusal.'),
+q('The RN role often includes:', 'assessment, care planning, medications, supervision',['only cleaning rooms','only meals','only physiotherapy'],'RNs assess, plan, implement, evaluate, and supervise.'),
+q('The PSW is accountable to:', 'supervisor, client, employer, and standards',['only family','only another PSW','only client'],'PSWs are accountable for safe care.')],
+BODY:[
+q('The largest body system is:', 'integumentary system',['respiratory system','urinary system','digestive system'],'The integumentary system is skin and related structures.'),
+q('The outer layer of skin is:', 'epidermis',['dermis','subcutaneous tissue','muscle'],'Epidermis is the outer layer.'),
+q('The dermis is located:', 'below the epidermis',['above the epidermis','inside the lung','inside the stomach'],'Dermis is under epidermis.'),
+q('A function of skin is:', 'all of these',['protection','temperature regulation','elimination'],'Skin protects, regulates temperature, and helps eliminate waste.'),
+q('Arteries carry blood:', 'away from the heart',['toward the heart','only to kidneys','only through veins'],'Arteries = away.'),
+q('Veins carry blood:', 'toward the heart',['away from heart','only oxygen','only hormones'],'Veins return blood to the heart.'),
+q('The left ventricle pumps blood to:', 'the rest of the body',['lungs only','stomach only','bladder only'],'Left ventricle pumps systemic blood.'),
+q('The liquid part of blood is:', 'plasma',['hemoglobin','platelets','leukocytes'],'Plasma is the liquid part.'),
+q('Hemoglobin carries:', 'oxygen',['urine','bile','insulin'],'Hemoglobin carries oxygen in red blood cells.'),
+q('Platelets help with:', 'blood clotting',['digestion','urination','breathing'],'Platelets clot blood.'),
+q('Gas exchange occurs in:', 'alveoli',['trachea','esophagus','stomach'],'Alveoli exchange oxygen and carbon dioxide.'),
+q('The main breathing muscle is:', 'diaphragm',['heart','bladder','kidney'],'The diaphragm is the main muscle of breathing.'),
+q('Endocrine glands secrete:', 'hormones',['mucus','urine','bile'],'Endocrine glands produce hormones.'),
+q('The kidneys help by:', 'removing waste and balancing fluids',['producing bile','exchanging oxygen','digesting food'],'Kidneys filter blood and balance fluids.'),
+q('Digestion begins in the:', 'mouth',['stomach','small intestine','colon'],'Digestion begins in the mouth.'),
+q('Most nutrient absorption occurs in:', 'small intestine',['stomach','esophagus','bladder'],'Most absorption is in the small intestine.'),
+q('The bladder mainly:', 'stores urine',['produces urine','filters blood','makes insulin'],'Bladder stores urine.')],
+CARE:[
+q('A care plan provides:', 'consistent care and continuity',['personal opinions','only family instructions','only medication orders'],'Care plans guide safe consistent care.'),
+q('Rehabilitation begins:', 'at the time of injury/illness',['after discharge only','only after one year','when family requests it'],'Rehab starts early.'),
+q('Rehabilitation helps the client:', 'reach the highest possible level of functioning',['become dependent','avoid activity','stop making choices'],'Rehab promotes function and independence.'),
+q('Active ROM means:', 'client moves the joint',['PSW moves the joint','nurse gives medication','family turns client'],'Active ROM is done by the client.'),
+q('Passive ROM means:', 'another person moves the joint',['client moves alone','no movement occurs','exercise is refused'],'Passive ROM is done by caregiver.'),
+q('ROM should be stopped if client:', 'feels pain',['smiles','talks','breathes normally'],'Never force beyond pain.'),
+q('Acute illness is usually:', 'sudden and short-term',['slow and lifelong','always incurable','always genetic'],'Acute is sudden/short term.'),
+q('Chronic illness is usually:', 'ongoing and long-term',['sudden and gone quickly','always infection','always injury'],'Chronic is long term.'),
+q('A trapeze may help client:', 'move up and turn in bed',['eat faster','hear better','stop pain medication'],'A trapeze helps movement in bed.'),
+q('A footboard helps prevent:', 'foot drop / plantar flexion',['fever','aspiration','constipation'],'Footboards prevent foot drop.'),
+q('Routine care is usually reported:', 'at report time/end of shift',['only next month','only to family','never'],'Routine reports happen at normal report times.'),
+q('Motivation means:', 'desire and energy to achieve something',['refusal to learn','physical paralysis','diagnosis'],'Motivation supports learning and rehab.'),
+q('Learning means:', 'acquiring new skills and knowledge',['loss of function','refusing care','medication effect'],'Learning is gaining knowledge/skill.'),
+q('If a client is angry during rehabilitation, PSW should:', 'understand feelings and offer support',['argue','ignore them','tell them to stop'],'Offer support and empathy.'),
+q('Care planning should be:', 'person-centred',['staff-convenient only','based on gossip','same for everyone'],'Care is individualized.')],
+COGN:[
+q('Delirium is usually:', 'sudden confusion and may be reversible',['gradual and permanent','normal aging','same as dementia'],'Delirium is sudden and urgent.'),
+q('Dementia is usually:', 'gradual cognitive decline',['sudden and always reversible','normal aging','temporary confusion only'],'Dementia is gradual decline.'),
+q('Alzheimer’s disease:', 'has no known cure',['is the same as delirium','is cured by diet','only affects young adults'],'Alzheimer’s has no known cure.'),
+q('A false belief not based in reality is:', 'delusion',['hallucination','depression','apathy'],'Delusion = false belief.'),
+q('Seeing/hearing something not real is:', 'hallucination',['delusion','anxiety','obsession'],'Hallucination = sensory experience not real.'),
+q('Delusion of persecution means person believes:', 'others are out to get them',['they cannot swallow','they are hungry','they are very wealthy'],'Persecution means feeling targeted.'),
+q('Depression may include:', 'persistent sadness and low motivation',['high energy only','improved sleep always','no emotional changes'],'Depression affects mood and motivation.'),
+q('Anxiety is:', 'vague uneasy feeling',['hair loss','blood clot','skin infection'],'Anxiety is uneasiness/fear.'),
+q('Obsession means:', 'persistent thought or idea',['loss of hair','sudden fever','difficulty swallowing'],'Obsessions are persistent thoughts/urges.'),
+q('Phobia means:', 'fear or panic',['high sugar','fainting','urinary pain'],'Phobia is strong fear.'),
+q('Bipolar disorder involves:', 'extreme mood swings',['only fever','only memory loss','only infection'],'Bipolar involves mood changes.'),
+q('Schizophrenia may include:', 'delusions and hallucinations',['kidney stones only','low blood sugar only','skin tears only'],'Psychosis can include delusions/hallucinations.'),
+q('Sundowning means:', 'behaviours worsen late afternoon/evening',['sleeping only in morning','fever at night','eating after sunset'],'Sundowning happens later in day.'),
+q('Apathy may include:', 'loss of initiative',['high energy','rapid speech','excessive happiness'],'Apathy is reduced interest/initiation.'),
+q('Parkinson’s may include:', 'tremors and shuffling gait',['perfect balance','sudden cure','increased dopamine only'],'Parkinson’s affects movement.'),
+q('Multiple sclerosis may include:', 'blurred/double vision and muscle weakness',['improved coordination','no neurological changes','only skin rash'],'MS affects nerves.')],
+DYING:[
+q('Palliative care focuses on:', 'comfort and quality of life',['speeding death','avoiding family','curing all disease'],'Palliative care improves comfort and quality.'),
+q('Hospice care is for persons who are:', 'terminally ill',['only children','only injured','only pregnant'],'Hospice supports terminal illness.'),
+q('Cachexia means:', 'involuntary weight loss',['shortness of breath','fever','constipation'],'Cachexia is involuntary weight loss.'),
+q('Dyspnea means:', 'difficulty breathing',['painful urination','difficulty swallowing','fainting'],'Dyspnea = shortness of breath.'),
+q('Comfort for dyspnea may include:', 'all of these',['repositioning','staying calm','airflow/fan if appropriate'],'Dyspnea comfort includes positioning and calm support.'),
+q('Family asks “How long does he have?” PSW should:', 'refer kindly to nurse/supervisor',['guess time','ignore them','say only God knows'],'PSWs do not predict prognosis.'),
+q('Grief is:', 'natural response to loss',['same for everyone','only physical','abnormal'],'Grief is normal and individual.'),
+q('When grieving, person may need:', 'all of these',['empathy and silence','individualized care','extra support if needed'],'Grief support is individualized.'),
+q('During post-mortem care, avoid:', 'discarding hearing aids/glasses',['brushing hair','gathering belongings','positioning respectfully'],'Do not discard personal assistive items.'),
+q('When death is imminent, PSW should know:', 'all of these',['who to call','whether to call 911','how to offer privacy/support'],'Know workplace policy and family support.'),
+q('Advance care planning includes:', 'values, beliefs, hopes, future care wishes',['only meal preferences','only clothing','only housekeeping'],'ACP discusses future wishes.'),
+q('Substitute decision maker helps when client:', 'cannot make decisions',['wants snacks','needs laundry','wants music'],'SDM may decide when client cannot.'),
+q('Common signs near death may include:', 'all of these',['decreased intake','irregular breathing','weakness'],'End-of-life changes include decreased intake and irregular breathing.'),
+q('Pain in dying clients should be:', 'reported and comfort measures provided as directed',['ignored','treated by PSW changing meds','hidden from family'],'Report pain and follow care plan.'),
+q('Nutrition near end of life:', 'often decreases as death nears',['always increases','must be forced','is unrelated to dying'],'Intake often decreases near death.'),
+q('Post-mortem care should be done with:', 'dignity and respect',['speed only','jokes','family ignored'],'Dignity continues after death.')],
+FAMI:[
+q('Growth means:', 'physical changes that can be measured',['only emotional change','only spiritual change','only social change'],'Growth is measurable physical change.'),
+q('Development means:', 'psychological and social changes/functioning',['only weight gain','only height increase','only fever'],'Development is functional/social/psychological change.'),
+q('Infancy is:', 'birth to 1 year',['1-3 years','6-8 years','12-18 years'],'Infancy is first year.'),
+q('Toddler age is usually:', '1-3 years',['birth to 1 year','6-8 years','12-18 years'],'Toddler is 1 to 3.'),
+q('Adolescence is usually:', '12-18 years',['birth to 1 year','1-3 years','65+'],'Adolescence is teen years.'),
+q('To reduce SIDS risk, infants should sleep:', 'on their back',['on stomach','with pillows','with bottle propped'],'Back to sleep reduces SIDS risk.'),
+q('Infant feeding reflexes include:', 'rooting and sucking',['walking and swimming','Moro and grasping only','crawling and jumping'],'Rooting/sucking support feeding.'),
+q('Cord care is usually done:', 'daily and when wet/soiled',['once a month','only by family','never'],'Cord care is done as directed and when soiled.'),
+q('Bottle feeding should include:', 'holding baby close',['propping bottle','leaving baby alone','laying baby flat'],'Never prop a bottle.'),
+q('A developmental task of adolescence is:', 'becoming independent from parents/adults',['selecting a life partner','retirement planning','infant feeding'],'Independence is adolescent task.'),
+q('Newborn care includes:', 'supporting the head',['leaving alone on bed','using pillows for sleep','feeding while flat'],'Support infant head and neck.'),
+q('Menopause is:', 'time when menstruation stops',['birth of baby','childhood stage','infection'],'Menopause ends menstruation.'),
+q('Postpartum blues may include:', 'mood swings/emotional reactions',['bone fracture','hair lice','kidney stones'],'Postpartum blues affect mood.'),
+q('Family disputes should be handled by PSW by:', 'remaining non-judgmental',['taking sides','arguing','gossiping'],'Remain neutral and report concerns.'),
+q('Puberty may include:', 'rapid body changes and mood changes',['no hormones','no emotional changes','loss of all independence'],'Puberty includes physical and emotional change.')],
+HEAL:[
+q('Malignant tumour means:', 'cancerous',['non-cancerous','fracture','infection only'],'Malignant = cancerous.'),
+q('Benign tumour means:', 'non-cancerous',['cancerous','always fatal','spread to bones'],'Benign = non-cancerous.'),
+q('Metastasis means cancer has:', 'spread to another body part',['disappeared','become non-cancerous','stayed in one area'],'Metastasis = spread.'),
+q('Osteoporosis increases risk for:', 'fractures',['high sugar','lice','aspiration'],'Osteoporosis weakens bones.'),
+q('Osteoarthritis is commonly caused by:', 'wear and tear of joints',['low oxygen','urinary infection','hallucination'],'OA is degenerative joint disease.'),
+q('Rheumatoid arthritis is:', 'autoimmune/joint inflammation',['hair loss','heart attack','skin tear only'],'RA is autoimmune inflammatory arthritis.'),
+q('COPD includes:', 'chronic bronchitis and emphysema',['kidney stones only','arthritis only','dementia only'],'COPD is chronic lung disease.'),
+q('Asthma involves:', 'narrowed air passages/spasms',['broken bone','high blood sugar only','skin infection'],'Asthma narrows airways.'),
+q('Pneumonia is:', 'infection of lung tissue',['bladder inflammation','kidney stone','skin ulcer'],'Pneumonia affects lungs.'),
+q('CHF may show:', 'swollen ankles and enlarged neck veins',['hair loss only','lice only','improved breathing always'],'CHF can cause fluid buildup.'),
+q('Myocardial infarction means:', 'heart attack',['fainting','low sugar','bladder infection'],'MI = heart attack.'),
+q('Phlebitis means:', 'inflammation of a vein',['inflammation of bladder','difficulty swallowing','hair loss'],'Phlebitis affects veins.'),
+q('Thrombus means:', 'blood clot',['air bubble','low oxygen','infection only'],'Thrombus = clot.'),
+q('Cystitis means:', 'inflammation of bladder',['kidney stone','heart failure','dementia'],'Cystitis = bladder inflammation.'),
+q('Pyelonephritis means:', 'kidney infection/inflammation',['hair loss','bone weakness','lung disease'],'Pyelonephritis affects kidneys.'),
+q('Hyperglycemia means:', 'high blood sugar',['low blood sugar','high blood pressure','low oxygen'],'Hyper = high.'),
+q('Hypoglycemia means:', 'low blood sugar',['high blood sugar','urinary pain','fever'],'Hypo = low.')],
+HOUS:[
+q('Clean linen should be placed:', 'on a clean surface',['on the floor','on dirty chair','anywhere'],'Keep clean linen clean.'),
+q('Soiled linen should be:', 'put in proper hamper',['shaken in air','placed on floor','returned to linen closet'],'Soiled linen goes to hamper.'),
+q('False linen statement:', 'soiled linen can be placed on the floor',['soiled linen goes in hamper','clean linen goes on clean surface','linen is handled carefully'],'Never put linen on floor.'),
+q('When cleaning, work from:', 'cleanest to dirtiest',['dirtiest to cleanest','floor first','wet to dry only'],'Clean to dirty prevents spread.'),
+q('Cleaning should usually be done from:', 'higher to lower surfaces',['lower to higher only','floor first','dirty to clean'],'Clean high to low.'),
+q('Cleaning cloths and water should be changed:', 'frequently',['never','once per month','only if family asks'],'Change cloths/water often.'),
+q('Spills should be wiped:', 'immediately',['next shift','after lunch only','never'],'Prevent falls and infection.'),
+q('For body fluid spills, PSW should:', 'use gloves and follow policy',['use bare hands','leave it','ask another resident'],'Use PPE and policy.'),
+q('Laundry care labels should be:', 'followed',['ignored','guessed','removed'],'Follow labels.'),
+q('A square laundry symbol usually tells:', 'how to dry',['if bleach can be used','if ironing is allowed','if dry cleaning is needed'],'Square = drying.'),
+q('A triangle laundry symbol usually tells:', 'if bleach can be used',['how to dry','if ironing is allowed','if item is dirty'],'Triangle = bleach.'),
+q('Room odours are best reduced by:', 'prompt cleaning and hygiene',['ignoring bedpans','keeping dirty linen in room','closing all windows forever'],'Remove the source.'),
+q('Over-bed table should not store:', 'urinal',['food tray','book','water cup'],'Do not store urinal on over-bed table.'),
+q('Body fluid soiling is mainly:', 'infection control issue',['decoration issue','sleep issue','laundry preference only'],'Body fluids require infection control.')],
+HYGI:[
+q('Perineal care should be done:', 'from urethra to anal area',['from back to front','in any direction','from anal area to urethra'],'Front to back prevents infection.'),
+q('Dentures should be cleaned:', 'over towel or water-filled sink',['over hard counter','with boiling water','without gloves'],'Protect dentures from breaking.'),
+q('Shaving should be done:', 'in direction of hair growth',['against hair growth','without permission','on dry skin only'],'Shave with hair growth.'),
+q('Before shaving, PSW should:', 'all of these',['ask permission','soften/moisten skin if needed','follow standard practices'],'Ask permission and prepare safely.'),
+q('Hair loss is called:', 'alopecia',['hirsutism','pediculosis','dermatitis'],'Alopecia = hair loss.'),
+q('Excessive hair growth is called:', 'hirsutism',['alopecia','syncope','dysphagia'],'Hirsutism = excessive hair.'),
+q('Infestation with lice is called:', 'pediculosis',['alopecia','hirsutism','cystitis'],'Pediculosis = lice.'),
+q('A pressure sore is also called:', 'decubitus ulcer',['dysphagia','cystitis','alopecia'],'Pressure sore = decubitus ulcer.'),
+q('First sign of pressure injury is often:', 'warm reddened skin',['black tissue','heavy bleeding','fracture'],'Early sign is red/warm area.'),
+q('Fragile skin should be:', 'patted dry gently',['rubbed hard','cleaned with very hot water','ignored'],'Pat fragile skin.'),
+q('Mouth care for unconscious person should be done:', 'with person turned on side if allowed',['flat on back','while standing','without reporting concerns'],'Side-lying helps prevent aspiration.'),
+q('Bathing helps:', 'all of these',['prevent odour','increase circulation','refresh/relax'],'Bathing has many purposes.'),
+q('When dressing affected side, usually:', 'dress affected side first',['dress affected side last','ignore affected side','force movement'],'Dress weak side first.'),
+q('Nail care should not be done by PSW for clients with:', 'all of these',['diabetes','poor circulation','blood thinners'],'These clients need special foot/nail care.'),
+q('Back massage should include:', 'warmed lotion',['massaging red bony areas','cold lotion only','strong pressure only'],'Warm lotion and gentle strokes.')],
+MEDS:[
+q('Medication purpose may include:', 'all of these',['treating illness','reducing pain','preventing infection'],'Meds have many purposes.'),
+q('A drug allergy is:', 'abnormal response to medication',['normal hunger','exercise response','low oxygen only'],'Allergy is abnormal immune response.'),
+q('Common side effects include:', 'all of these',['nausea','vomiting','constipation'],'These are common side effects.'),
+q('Anaphylactic shock can be:', 'life-threatening',['normal','ignored','treated by PSW changing dose'],'Anaphylaxis is emergency.'),
+q('Nine rights include:', 'right person, medication, dose, route, time',['right colour and price','right family only','right smell and taste'],'Know the rights.'),
+q('If client thinks too much medication was given, PSW should:', 'report to nurse/supervisor',['ignore','change dose','tell client they are wrong'],'Report medication concerns.'),
+q('Drug interaction means:', 'medication interacts with other substances',['client refuses food','nurse writes chart','PSW changes prescription'],'Interactions change effects.'),
+q('Drug antagonism means:', 'unusually weak effect when drugs interact',['hair loss','high sugar','normal charting'],'Antagonism reduces effect.'),
+q('Sublingual medication is placed:', 'under tongue',['on skin','in ear','in eye'],'Sublingual = under tongue.'),
+q('Topical medication is applied:', 'on skin',['under tongue','in rectum','in vein'],'Topical = skin.'),
+q('Otic medication is for:', 'ear',['eye','skin','mouth'],'Otic = ear.'),
+q('Ophthalmic medication is for:', 'eye',['ear','skin','bladder'],'Ophthalmic/optic = eye.'),
+q('Medication on empty stomach is usually taken:', '1 hour before eating',['immediately after meal','with heavy food','anytime'],'Usually before meals.'),
+q('Polypharmacy means:', 'using more medications than medically required',['no medication','one medication only','pharmacy store'],'Polypharmacy = too many meds.'),
+q('Medications should be kept:', 'in original labelled container',['beside bed open','mixed with family meds','in humid bathroom'],'Keep meds labelled and safe.')],
+SAFE:[
+q('A restraint is used:', 'only according to order, policy, and care plan',['whenever staff are busy','whenever family says','to punish client'],'Restraints are last resort and controlled.'),
+q('Bed rails may be:', 'restraint depending on use',['never restraint','always safe','decoration only'],'Bed rails can restrict movement.'),
+q('In RACE, R means:', 'rescue',['run','report','return'],'RACE: Rescue, Alarm, Confine, Evacuate.'),
+q('In PASS, P means:', 'pull pin',['push client','place water','prepare bed'],'PASS: Pull, Aim, Squeeze, Sweep.'),
+q('During fire alarm, unsafe action is:', 'using elevator',['closing doors','moving clients away from danger','sounding alarm'],'Never use elevator during fire.'),
+q('During seizure, do NOT:', 'hold client down',['move objects away','time seizure','report'],'Do not restrain seizure movement.'),
+q('Spinal injury turning requires:', 'log rolling as one unit',['twisting hips','pulling arms','sitting fast'],'Log roll maintains alignment.'),
+q('Proper body mechanics include:', 'wide base of support',['twisting','bending waist','load far from body'],'Wide base gives stability.'),
+q('Safest way to move heavy object:', 'slide or push',['lift high','twist','hold far away'],'Slide/push when possible.'),
+q('To prevent falls:', 'use non-slip footwear',['keep clutter','raise bed high','remove call bell'],'Non-slip footwear prevents falls.'),
+q('Mechanical lift should be used by PSW who is:', 'trained',['strong only','new only','family-approved only'],'Training required.'),
+q('Contaminated gloves should be:', 'removed, hand hygiene done',['washed and reused','sanitized and reused','kept on'],'Remove gloves and clean hands.'),
+q('PPE stands for:', 'personal protective equipment',['patient physical exam','personal physical effort','protective patient exercise'],'PPE protects from exposure.'),
+q('Sterile field is:', 'free of all microbes',['client’s room','regular table','dirty area'],'Sterile = no microbes.'),
+q('Minor burn care includes:', 'cool water, cover, report',['butter','hot water','rubbing'],'Cool burn, cover, report.'),
+q('Hospital bed should usually be left:', 'lowest position',['highest position','tilted always','with clutter around'],'Low bed helps prevent falls.')],
+GPA:[
+q('GPA helps support clients with:', 'responsive behaviours',['blood sugar','wound care','medication dose'],'GPA is for responsive behaviours.'),
+q('Responsive behaviours may be caused by:', 'all of these',['pain','fear','confusion'],'Look for causes.'),
+q('If a client grabs you, you should:', 'remain calm and use their name',['stiffen arms','yell loudly','pull forcefully'],'Stay calm and ask to let go.'),
+q('Successful redirection includes:', 'validation and distraction',['dismissal','arguing','ignoring'],'Validate then redirect.'),
+q('De-escalation includes:', 'calm environment and support',['shouting','blocking exit','touching without warning'],'Reduce stimulation and support.'),
+q('Person-centred dementia care means:', 'focus on person, not just task',['force task quickly','ignore emotions','use restraint first'],'Person first.'),
+q('Unconditional positive regard means:', 'respect and acceptance',['punishment','ignoring person','arguing'],'Respect the person.'),
+q('Physical restraints threaten personhood because they:', 'all of these',['restrict movement','limit access to body','may be last resort'],'Restraints affect freedom and dignity.'),
+q('Communication with dementia client should be:', 'simple and calm',['rushed','loud and angry','several questions at once'],'Keep communication simple.'),
+q('Sundowning means:', 'behaviours worsen late afternoon/evening',['sleeping all day','fever at night','low sugar'],'Sundowning worsens later in day.'),
+q('A’s of dementia memory loss is:', 'amnesia',['aphasia','apraxia','apathy'],'Amnesia = memory loss.'),
+q('Apraxia means:', 'inability to perform purposeful movements',['false belief','seeing things','fainting'],'Apraxia affects purposeful movement.'),
+q('Aphasia means:', 'difficulty speaking/understanding language',['difficulty swallowing','painful urination','high sugar'],'Aphasia = language difficulty.'),
+q('Apathy means:', 'loss of initiative/interest',['high energy','fast speech','fever'],'Apathy = reduced interest.'),
+q('Dementia behaviours should be met with:', 'calm, respectful support',['punishment','arguing','ignoring always'],'Respond calmly and respectfully.')],
+ABUS:[
+q('Physical abuse includes:', 'hitting, slapping, pinching',['forgetting laundry only','poor diet only','sadness only'],'Physical abuse involves physical harm.'),
+q('Neglect means:', 'failure to provide basic necessities',['giving respect','proper care','privacy'],'Neglect is failure to provide needed care.'),
+q('Financial abuse means:', 'misuse of person’s money/property',['bathing client','giving food','reporting pain'],'Financial abuse misuses money/property.'),
+q('Sexual abuse may include:', 'unwanted sexual contact/harassment',['feeding','laundry','charting'],'Sexual abuse includes unwanted sexual acts/comments.'),
+q('Invasion of privacy includes:', 'sharing photo/private information without consent',['closing curtain','respectful care','following care plan'],'Privacy requires consent.'),
+q('If abuse is suspected, PSW should:', 'report according to policy immediately',['investigate alone','promise secrecy','ignore unless proven'],'Report suspected abuse.'),
+q('Child abuse must be reported to:', 'child protection/public authority',['neighbour','another child','only family'],'Child abuse reporting is mandatory.'),
+q('The cycle of abuse includes:', 'tension-building, abusive, honeymoon phases',['breakfast, lunch, dinner','admission, discharge, transfer','assessment, diagnosis, medication'],'Know the abuse cycle.')]
+};
+function q(question,correct,wrong,explain){return{question,correct,wrong,explain}};
+let current=[],checked=false,seconds=180*60,clock=null;
+const letters=['A','B','C','D'];
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function buildFromSection(code,count){let pool=pools[code],arr=[];for(let i=0;i<count;i++){let base=pool[i%pool.length];let opts=shuffle([base.correct,...base.wrong]);arr.push({sec:code,question:base.question,opts,ans:opts.indexOf(base.correct),explain:base.explain})}return arr}
+function newFullExam(){if(!confirm('Start a new full 200-question exam?'))return;current=[];Object.keys(blueprint).forEach(code=>current.push(...buildFromSection(code,blueprint[code])));current=shuffle(current);checked=false;seconds=180*60;document.getElementById('modeText').textContent='Full Exam';render();startTimer();save()}
+function startSection(){let code=document.getElementById('sectionSelect').value;current=buildFromSection(code,blueprint[code]);checked=false;seconds=Math.max(15*60,Math.ceil(current.length*.9*60));document.getElementById('modeText').textContent=code+' - '+names[code];render();startTimer();save()}
+function render(){document.getElementById('total').textContent=current.length;document.getElementById('score').textContent='--';document.getElementById('resultBox').classList.add('hide');let quiz=document.getElementById('quiz');quiz.innerHTML='';current.forEach((it,i)=>{let div=document.createElement('div');div.className='q';div.id='q'+i;div.innerHTML=`<div class="sec">${it.sec} - ${names[it.sec]}</div><div class="qhead"><div class="qnum">Q${i+1}</div><div class="qtext">${esc(it.question)}</div></div>${it.opts.map((op,j)=>`<label class="opt" id="q${i}o${j}"><input type="radio" name="q${i}" value="${j}" onchange="update();save()"><b>${letters[j]}.</b> ${esc(op)}</label>`).join('')}<div class="fb" id="fb${i}"></div>`;quiz.appendChild(div)});update()}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function sel(i){let e=document.querySelector(`input[name="q${i}"]:checked`);return e?+e.value:null}
+function update(){let a=0;current.forEach((_,i)=>{if(sel(i)!==null)a++});document.getElementById('answered').textContent=a;document.getElementById('bar').style.width=(current.length?100*a/current.length:0)+'%'}
+function submitExam(){checked=true;clearInterval(clock);let score=0,by={};current.forEach((it,i)=>{by[it.sec]??={right:0,total:0};by[it.sec].total++;let s=sel(i),card=document.getElementById('q'+i),fb=document.getElementById('fb'+i);card.classList.remove('good','bad');it.opts.forEach((_,j)=>document.getElementById(`q${i}o${j}`).classList.remove('right','wrong'));document.getElementById(`q${i}o${it.ans}`).classList.add('right');if(s===it.ans){score++;by[it.sec].right++;card.classList.add('good');fb.innerHTML='<b style="color:var(--green)">Correct.</b> '+esc(it.explain)}else{card.classList.add('bad');if(s!==null)document.getElementById(`q${i}o${s}`).classList.add('wrong');fb.innerHTML='<b style="color:var(--red)">Wrong.</b> Correct: <b>'+letters[it.ans]+'</b>. '+esc(it.explain)}fb.classList.add('show')});let pct=Math.round(score/current.length*100);document.getElementById('score').textContent=`${score}/${current.length} (${pct}%)`;let rows=Object.keys(by).sort().map(k=>`<tr><td>${k} - ${names[k]}</td><td>${by[k].right}/${by[k].total}</td><td>${Math.round(by[k].right/by[k].total*100)}%</td></tr>`).join('');let msg=pct>=80?'Exam-ready level. Keep reviewing wrong answers.':pct>=70?'Close, but review weak sections before the real exam.':'Needs more practice before using an attempt.';let box=document.getElementById('resultBox');box.classList.remove('hide');box.innerHTML=`<div class="result">Result: ${score}/${current.length} (${pct}%)</div><p><b>${msg}</b></p><table><thead><tr><th>Section</th><th>Score</th><th>%</th></tr></thead><tbody>${rows}</tbody></table>`;window.scrollTo({top:0,behavior:'smooth'});save()}
+function showWrongOnly(){if(!checked)submitExam();current.forEach((_,i)=>{let c=document.getElementById('q'+i);c.classList.toggle('hide',!c.classList.contains('bad'))})}
+function showAll(){current.forEach((_,i)=>document.getElementById('q'+i).classList.remove('hide'))}
+function startTimer(){clearInterval(clock);tick();clock=setInterval(()=>{seconds--;tick();if(seconds<=0){clearInterval(clock);submitExam()}},1000)}
+function tick(){let m=Math.floor(seconds/60),s=seconds%60;document.getElementById('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function save(){let answers=current.map((_,i)=>sel(i));localStorage.setItem('pswExamPrep',JSON.stringify({current,answers,seconds,mode:document.getElementById('modeText').textContent}))}
+function load(){let raw=localStorage.getItem('pswExamPrep');if(!raw){current=[];Object.keys(blueprint).forEach(code=>current.push(...buildFromSection(code,blueprint[code])));current=shuffle(current);render();startTimer();return}try{let d=JSON.parse(raw);current=d.current||[];seconds=d.seconds||180*60;document.getElementById('modeText').textContent=d.mode||'Full Exam';render();(d.answers||[]).forEach((v,i)=>{if(v!==null){let e=document.querySelector(`input[name="q${i}"][value="${v}"]`);if(e)e.checked=true}});update();startTimer()}catch(e){newFullExam()}}
+function resetAll(){if(confirm('Reset current quiz and saved progress?')){localStorage.removeItem('pswExamPrep');location.reload()}}
+function init(){let sel=document.getElementById('sectionSelect');Object.keys(blueprint).forEach(k=>{let o=document.createElement('option');o.value=k;o.textContent=`${k} - ${names[k]} (${blueprint[k]}Q)`;sel.appendChild(o)});load()}
+init();
+</script>
+</body>
+</html>
